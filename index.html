@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>TSA Video Analyse Plattform</title>
+
+<style>
+:root{--dark:#060d1a;--blue:#0f2040;--mid:#0a1628;--card:#0d1f3c;--border:#1e3a5f;--orange:#f97316;--text:#e2e8f0;--muted:#64748b;--faint:#334155;--green:#22c55e;--red:#ef4444;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{min-height:100%;}
+body{min-height:100%;background:var(--dark);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;-webkit-text-size-adjust:100%;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--dark);}::-webkit-scrollbar-thumb{background:var(--orange);border-radius:2px;}
+button{cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+input,textarea,select{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;color:var(--text);}
+.page{display:none;flex-direction:column;min-height:100vh;}.page.active{display:flex;}
+.top-bar{background:linear-gradient(135deg,var(--blue),var(--mid));border-bottom:2px solid var(--orange);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px;}
+.logo{width:42px;height:42px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--dark);flex-shrink:0;}
+.top-title{font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#fff;line-height:1;}
+.top-sub{font-size:8px;letter-spacing:2.5px;color:var(--orange);text-transform:uppercase;margin-top:3px;}
+.top-nav{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.nav-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 13px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.nav-btn:hover,.nav-btn:active{background:var(--orange);border-color:var(--orange);color:var(--dark);}
+.upload-hero{background:linear-gradient(160deg,#0a1628 0%,#060d1a 60%);padding:44px 24px 32px;text-align:center;position:relative;overflow:hidden;}
+.upload-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(249,115,22,.08),transparent);pointer-events:none;}
+.hero-badge{display:inline-block;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);color:var(--orange);font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:16px;}
+.hero-h1{font-size:32px;font-weight:900;letter-spacing:2px;text-transform:uppercase;line-height:1.05;color:#fff;margin-bottom:10px;}
+.hero-h1 span{color:var(--orange);}
+.hero-sub{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.6;}
+.upload-form-wrap{max-width:560px;margin:0 auto;padding:24px 16px 48px;width:100%;}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.form-section-title{font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:16px;padding-bottom:9px;border-bottom:1px solid var(--border);}
+.frow{margin-bottom:14px;}.flabel{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block;}
+.finput,.fselect,.ftextarea{width:100%;background:var(--mid);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 13px;font-size:13px;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none;}
+.finput:focus,.fselect:focus,.ftextarea:focus{border-color:var(--orange);}
+.ftextarea{resize:vertical;min-height:76px;line-height:1.5;}
+.fselect{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px;}
+.fselect option{background:#0d1f3c;}
+.frow-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:500px){.frow-2{grid-template-columns:1fr;}}
+.ferr{font-size:10px;color:var(--red);margin-top:4px;display:none;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+.drop-zone{border:2px dashed var(--border);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--mid);position:relative;overflow:hidden;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--orange);background:rgba(249,115,22,.04);}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2;}
+.drop-icon{font-size:28px;margin-bottom:8px;}.drop-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.drop-hint{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;color:var(--muted);}
+.file-chosen{margin-top:10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:6px;padding:7px 11px;display:none;align-items:center;gap:8px;position:relative;z-index:1;}
+.file-chosen.show{display:flex;}.file-nm{font-size:11px;color:var(--green);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;flex:1;word-break:break-all;}
+.file-sz{font-size:10px;color:var(--muted);flex-shrink:0;}
+.file-warn{font-size:10px;color:#fb923c;margin-top:6px;display:none;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+.file-warn.show{display:block;}
+.einw-box{background:rgba(249,115,22,.04);border:1px solid rgba(249,115,22,.25);border-radius:10px;padding:16px 18px;margin-top:14px;}
+.einw-title{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;}
+.btn-dl-pdf{display:inline-flex;align-items:center;gap:7px;background:var(--orange);color:var(--dark);border:none;padding:9px 16px;border-radius:7px;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:opacity .15s;margin-bottom:12px;}
+.btn-dl-pdf:hover{opacity:.85;}
+.einw-hint{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#94a3b8;line-height:1.6;margin-bottom:12px;}
+.einw-hint strong{color:var(--text);}
+.drop-zone-doc{border:2px dashed var(--border);border-radius:8px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;background:var(--mid);position:relative;}
+.drop-zone-doc:hover,.drop-zone-doc.drag-over{border-color:var(--orange);background:rgba(249,115,22,.04);}
+.drop-zone-doc input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2;}
+.doc-chosen{margin-top:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:6px;padding:6px 10px;display:none;align-items:center;gap:7px;}
+.doc-chosen.show{display:flex;}.doc-nm{font-size:10px;color:var(--green);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;flex:1;word-break:break-all;}
+.btn-submit{width:100%;background:var(--orange);color:var(--dark);border:none;padding:13px;border-radius:8px;font-size:14px;font-weight:900;letter-spacing:2px;text-transform:uppercase;transition:opacity .15s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-tap-highlight-color:transparent;}
+.btn-submit:hover{opacity:.88;}.btn-submit:disabled{opacity:.4;cursor:not-allowed;}
+.consent-box{background:rgba(249,115,22,.04);border:1px solid rgba(249,115,22,.18);border-radius:10px;padding:16px 18px;margin-top:18px;}
+.consent-title{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:14px;}
+.chk-row{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;}
+.chk-row input[type=checkbox]{width:18px;height:18px;min-width:18px;margin-top:1px;accent-color:var(--orange);cursor:pointer;flex-shrink:0;}
+.chk-label{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#94a3b8;line-height:1.55;cursor:pointer;}
+.chk-label a{color:var(--orange);text-decoration:underline;cursor:pointer;}.chk-label strong{color:var(--text);}
+.ferr-chk{font-size:10px;color:var(--red);margin-top:3px;display:none;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+.success-screen{display:none;flex-direction:column;align-items:center;text-align:center;padding:48px 20px;}
+.success-screen.show{display:flex;}.success-icon{font-size:52px;margin-bottom:14px;}
+.success-title{font-size:22px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:8px;}
+.success-text{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--muted);line-height:1.6;max-width:340px;}
+.btn-again{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 18px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:18px;transition:all .15s;}
+.btn-again:hover{border-color:var(--orange);color:var(--orange);}
+.success-summary{width:100%;max-width:440px;margin:20px auto 0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:left;}
+.success-summary-title{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:14px;}
+.success-details{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:14px;}
+.success-detail{background:var(--mid);border-radius:6px;padding:8px 11px;}
+.sdl{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
+.sdv{font-size:11px;font-weight:700;color:var(--text);word-break:break-all;}
+.mail-box{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px 14px;margin-top:4px;}
+.mail-box-title{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin-bottom:5px;}
+.mail-box-text{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#94a3b8;line-height:1.55;}
+.demo-note{display:none;background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.15);border-radius:8px;padding:10px 12px;margin-top:8px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:10px;color:var(--orange);line-height:1.5;}
+.admin-login{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 20px;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:360px;}
+.login-title{font-size:17px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:20px;text-align:center;}
+.login-err{font-size:11px;color:var(--red);margin-top:5px;display:none;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}.login-err.show{display:block;}
+.admin-main{display:none;flex-direction:column;flex:1;}.admin-main.show{display:flex;}
+.cfg-banner{background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.2);border-radius:8px;padding:10px 16px;margin:12px 24px 0;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:10px;color:var(--orange);line-height:1.5;flex-shrink:0;}
+.stats-bar{background:var(--mid);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;gap:20px;flex-wrap:wrap;flex-shrink:0;}
+.stat-item{display:flex;flex-direction:column;}.stat-val{font-size:18px;font-weight:900;color:var(--orange);line-height:1;}
+.stat-lbl{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:1px;}
+.filter-bar{padding:10px 24px;display:flex;gap:7px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;}
+.filter-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.filter-btn:hover,.filter-btn.on{background:var(--orange);border-color:var(--orange);color:var(--dark);}
+.search-wrap{margin-left:auto;}
+.filter-search{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:5px 13px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;outline:none;transition:border-color .15s;width:175px;-webkit-appearance:none;}
+.filter-search:focus{border-color:var(--orange);}
+@media(max-width:600px){.search-wrap{margin-left:0;width:100%;}.filter-search{width:100%;}}
+.submissions{padding:14px 24px 24px;overflow-y:auto;flex:1;}
+.sub-empty{text-align:center;padding:50px 20px;color:var(--muted);}.sub-empty-icon{font-size:36px;margin-bottom:10px;}
+.sub-empty-text{font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+.sub-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;transition:box-shadow .15s;}
+.sub-card:hover{box-shadow:0 4px 20px rgba(249,115,22,.08);}
+.sub-hdr{padding:14px 18px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
+.sub-avatar{width:40px;height:40px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--dark);flex-shrink:0;}
+.sub-info{flex:1;min-width:0;}.sub-name{font-size:14px;font-weight:800;color:#fff;line-height:1;}
+.sub-meta{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:10px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sub-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.sub-badge{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:4px;padding:2px 7px;border:1px solid;}
+.b-eltern{background:#1e1b4b;color:#a5b4fc;border-color:#3730a3;}.b-spieler{background:#0f2040;color:#7dd3fc;border-color:#0369a1;}
+.b-trainer{background:#1c1917;color:#fdba74;border-color:#c2410c;}.b-neu{background:#052e16;color:#4ade80;border-color:#166534;}
+.b-analyse{background:#1e3a5f;color:#60a5fa;border-color:#1d4ed8;}.b-fertig{background:#431407;color:#fb923c;border-color:#c2410c;}
+.sub-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.sub-time{font-size:9px;color:var(--faint);white-space:nowrap;}
+.sub-chev{font-size:11px;color:var(--muted);transition:transform .2s;line-height:1;}.sub-card.open .sub-chev{transform:rotate(180deg);}
+.sub-body{display:none;border-top:1px solid var(--border);padding:16px 18px;}.sub-card.open .sub-body{display:block;}
+.video-wrap{background:var(--mid);border-radius:8px;overflow:hidden;margin-bottom:14px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;}
+.sub-video{width:100%;height:100%;object-fit:contain;display:block;}.no-video{text-align:center;padding:22px;color:var(--muted);}
+.no-video-txt{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;line-height:1.5;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+@media(max-width:500px){.detail-grid{grid-template-columns:1fr;}}
+.detail-box{background:var(--mid);border-radius:6px;padding:9px 12px;}.dl{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
+.dv{font-size:12px;font-weight:700;color:var(--text);}
+.notiz-box{background:var(--mid);border-radius:6px;padding:10px 12px;margin-bottom:14px;}
+.notiz-txt{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#94a3b8;line-height:1.6;}
+.analyse-box{background:var(--mid);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.analyse-title{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.analyse-body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#94a3b8;line-height:1.75;white-space:pre-wrap;max-height:300px;overflow-y:auto;}
+.analyse-empty{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;color:var(--muted);font-style:italic;}
+.btn-analyse{background:var(--orange);color:var(--dark);border:none;padding:7px 15px;border-radius:6px;font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px;margin-top:10px;transition:opacity .15s;-webkit-tap-highlight-color:transparent;}
+.btn-analyse:hover{opacity:.85;}.btn-analyse:disabled{opacity:.4;cursor:not-allowed;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:12px;height:12px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--dark);border-radius:50%;animation:spin .6s linear infinite;display:inline-block;flex-shrink:0;}
+.btn-submit .spinner{border:2px solid rgba(0,0,0,.2);border-top-color:var(--dark);}
+.analyse-loading{display:none;align-items:center;gap:7px;font-size:10px;color:var(--muted);margin-top:8px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+.analyse-loading.show{display:flex;}.analyse-loading .spinner{border:2px solid var(--border);border-top-color:var(--orange);}
+.sub-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+.act-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.act-btn:hover,.act-btn:active{border-color:var(--orange);color:var(--orange);}
+.act-btn.del:hover,.act-btn.del:active{border-color:var(--red);color:var(--red);}
+.dsmodal-overlay{position:fixed;inset:0;background:rgba(6,13,26,.92);display:flex;align-items:center;justify-content:center;z-index:8888;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.dsmodal-overlay.open{opacity:1;pointer-events:all;}
+.dsmodal{background:var(--card);border:1px solid var(--border);border-radius:14px;width:100%;max-width:600px;max-height:88vh;display:flex;flex-direction:column;transform:translateY(14px);transition:transform .2s;}
+.dsmodal-overlay.open .dsmodal{transform:translateY(0);}
+.dsmodal-head{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.dsmodal-head-title{font-size:14px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--orange);}
+.dsmodal-close{background:var(--border);border:none;color:var(--muted);width:28px;height:28px;border-radius:6px;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer;}
+.dsmodal-close:hover{background:var(--orange);color:var(--dark);}
+.dsmodal-body{padding:20px 22px;overflow-y:auto;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#94a3b8;line-height:1.75;}
+.dsmodal-body h3{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);margin:16px 0 6px;padding-top:4px;border-top:1px solid var(--border);}
+.dsmodal-body h3:first-child{border-top:none;margin-top:0;}
+.dsmodal-body p{margin-bottom:8px;}.dsmodal-body ul{padding-left:16px;margin-bottom:8px;}.dsmodal-body li{margin-bottom:4px;}.dsmodal-body strong{color:var(--text);}
+.dsmodal-foot{padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0;}
+.btn-ds-close{background:var(--orange);color:var(--dark);border:none;padding:9px 22px;border-radius:7px;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:opacity .15s;}
+.btn-ds-close:hover{opacity:.85;}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--orange);color:var(--dark);padding:7px 16px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:0;transition:all .2s;pointer-events:none;z-index:9999;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.foot{background:var(--mid);border-top:1px solid var(--border);padding:5px 24px;display:flex;justify-content:space-between;font-size:8px;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase;flex-shrink:0;flex-wrap:wrap;gap:3px;}
+.hi{color:var(--orange);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.fade{animation:fadeUp .24s ease both;}
+</style>
+</head>
+<body>
+
+<div id="pg-upload" class="page active">
+  <div class="top-bar">
+    <div style="display:flex;align-items:center;gap:11px;">
+      <div class="logo">TSA</div>
+      <div><div class="top-title">TSA Video Analyse</div><div class="top-sub">Talent Soccer Academy &middot; Donaueschingen</div></div>
+    </div>
+    <div class="top-nav"><button type="button" class="nav-btn" onclick="goAdmin()">&#128274; Admin</button></div>
+  </div>
+  <div class="upload-hero">
+    <div class="hero-badge">TSA Talent Scout &middot; Video Einreichung</div>
+    <h1 class="hero-h1">Dein Video.<br/><span>Deine Analyse.</span></h1>
+    <p class="hero-sub">Lade dein Spielvideo hoch und erhalte eine professionelle TSA Talent-Analyse auf NLZ-Niveau.</p>
+  </div>
+  <div class="upload-form-wrap">
+    <div class="form-card fade" id="upload-form">
+      <div class="form-section-title">Pers&#246;nliche Angaben</div>
+      <div class="frow-2">
+        <div class="frow"><label class="flabel" for="u-vn">Vorname *</label><input class="finput" id="u-vn" placeholder="Max" autocomplete="given-name"/><div class="ferr" id="e-vn">Pflichtfeld</div></div>
+        <div class="frow"><label class="flabel" for="u-nn">Nachname *</label><input class="finput" id="u-nn" placeholder="Mustermann" autocomplete="family-name"/><div class="ferr" id="e-nn">Pflichtfeld</div></div>
+      </div>
+      <div class="frow"><label class="flabel" for="u-mail">E-Mail *</label><input class="finput" id="u-mail" type="email" placeholder="email@beispiel.de" autocomplete="email"/><div class="ferr" id="e-mail">Bitte g&#252;ltige E-Mail eingeben</div></div>
+      <div class="frow-2">
+        <div class="frow"><label class="flabel" for="u-rolle">Ich bin *</label><select class="fselect" id="u-rolle"><option value="eltern">Elternteil</option><option value="spieler">Spieler / Spielerin</option><option value="trainer">Trainer / Scout</option></select></div>
+        <div class="frow"><label class="flabel" for="u-sp">Name des Spielers *</label><input class="finput" id="u-sp" placeholder="Spielername"/><div class="ferr" id="e-sp">Pflichtfeld</div></div>
+      </div>
+      <div class="frow-2">
+        <div class="frow"><label class="flabel" for="u-geb">Geburtsjahr</label><input class="finput" id="u-geb" placeholder="z.B. 2012" maxlength="4" inputmode="numeric"/></div>
+        <div class="frow"><label class="flabel" for="u-pos">Position</label><select class="fselect" id="u-pos"><option value="">- w&#228;hlen -</option><option>Torwart</option><option>Innenverteidiger</option><option>Au&#223;enverteidiger</option><option>Defensives Mittelfeld</option><option>Zentrales Mittelfeld</option><option>Offensives Mittelfeld</option><option>Fl&#252;gel links</option><option>Fl&#252;gel rechts</option><option>St&#252;rmer</option></select></div>
+      </div>
+      <div class="frow"><label class="flabel" for="u-note">Schwerpunkt / Hinweis (optional)</label><textarea class="ftextarea" id="u-note" placeholder="z.B. Bitte Dribbling bewerten..."></textarea></div>
+      <div class="form-section-title" style="margin-top:4px;">Video Upload</div>
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="u-file" accept="video/*" onchange="onFileInput(this)"/>
+        <div class="drop-icon">&#127916;</div>
+        <div class="drop-title">Video tippen oder hier ablegen</div>
+        <div class="drop-hint">MP4, MOV, AVI &middot; max. 50 MB empfohlen</div>
+        <div class="file-chosen" id="file-chosen"><span>&#9989;</span><span class="file-nm" id="file-nm"></span><span class="file-sz" id="file-sz"></span></div>
+        <div class="file-warn" id="file-warn">&#9888; Datei &#252;ber 50 MB</div>
+      </div>
+      <div class="ferr" id="e-file" style="margin-top:6px;">Bitte ein Video ausw&#228;hlen</div>
+      <div class="consent-box" style="margin-top:18px;">
+        <div class="consent-title">&#128274; Datenschutz &amp; Einwilligung</div>
+        <div class="chk-row"><input type="checkbox" id="chk-dsgvo"/><label class="chk-label" for="chk-dsgvo">Ich habe die <a onclick="openDSModal()">Datenschutzerkl&#228;rung</a> gelesen und stimme der Verarbeitung meiner Daten gem&#228;&#223; <strong>Art. 6 Abs. 1 lit. a DSGVO</strong> zu. *</label></div>
+        <div class="ferr-chk" id="e-dsgvo">Bitte stimme der Datenschutzerkl&#228;rung zu.</div>
+        <div class="chk-row"><input type="checkbox" id="chk-video"/><label class="chk-label" for="chk-video">Ich willige ein, dass das Video durch TSA und KI-Systeme (<strong>Claude AI / Anthropic</strong> und <strong>ChatGPT / OpenAI</strong>) <strong>ausschlie&#223;lich zur Talentanalyse</strong> ausgewertet wird. *</label></div>
+        <div class="ferr-chk" id="e-video">Bitte stimme der Videoanalyse zu.</div>
+        <div id="chk-minor-wrap" style="display:none;">
+          <div class="chk-row"><input type="checkbox" id="chk-minor"/><label class="chk-label" for="chk-minor">Ich best&#228;tige als <strong>erziehungsberechtigte Person</strong>, dass ich die Einwilligung f&#252;r den minderj&#228;hrigen Spieler erteile (<strong>Art. 8 DSGVO</strong>). *</label></div>
+          <div class="ferr-chk" id="e-minor">Elterliche Zustimmung ist Pflicht.</div>
+          <div id="einwilligung-upload-wrap" style="display:none;margin-top:10px;">
+            <div class="einw-box">
+              <div class="einw-title">&#128196; Einwilligungsformular hochladen</div>
+              <p class="einw-hint"><strong>Pflicht bei Minderj&#228;hrigen:</strong> Formular herunterladen, ausdrucken, unterschreiben, dann fotografieren oder scannen und hochladen.</p>
+              <button type="button" class="btn-dl-pdf" onclick="downloadPDF()">&#11015; Formular herunterladen (PDF)</button>
+              <div class="drop-zone-doc" id="drop-zone-doc">
+                <input type="file" id="u-doc" accept="image/*,application/pdf" onchange="onDocInput(this)"/>
+                <div style="font-size:20px;margin-bottom:6px;">&#128203;</div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px;">Unterschriebenes Formular hochladen</div>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:10px;color:var(--muted);">JPG, PNG oder PDF</div>
+                <div class="doc-chosen" id="doc-chosen"><span>&#9989;</span><span class="doc-nm" id="doc-nm"></span></div>
+              </div>
+              <div class="ferr-chk" id="e-doc" style="margin-top:6px;">Bitte das Formular hochladen.</div>
+            </div>
+          </div>
+        </div>
+        <div class="chk-row"><input type="checkbox" id="chk-agb"/><label class="chk-label" for="chk-agb">Ich best&#228;tige, zur Einreichung berechtigt zu sein und alle abgebildeten Personen informiert zu haben. *</label></div>
+        <div class="ferr-chk" id="e-agb">Bitte best&#228;tige.</div>
+      </div>
+      <button type="button" class="btn-submit" id="btn-submit" onclick="submitForm()"><span>&#128640;</span> Video einreichen</button>
+    </div>
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">&#127919;</div>
+      <div class="success-title">Eingereicht!</div>
+      <p class="success-text">Dein Video wurde &#252;bermittelt. Das TSA-Team analysiert es auf NLZ-Niveau.</p>
+      <div class="success-summary">
+        <div class="success-summary-title">&#128203; Deine Einreichung</div>
+        <div class="success-details" id="success-details"></div>
+        <div class="mail-box"><div class="mail-box-title">&#9993; Best&#228;tigungs-E-Mail</div><div class="mail-box-text" id="success-mail-text"></div></div>
+        <div class="demo-note" id="success-demo-note"><strong>Demo-Modus:</strong> Nach EmailJS-Einrichtung automatisch per E-Mail.</div>
+      </div>
+      <button type="button" class="btn-again" onclick="resetForm()">Weiteres Video einreichen</button>
+    </div>
+  </div>
+  <div class="foot"><span>&#169; Jackson Agbonkhese &middot; Talent Soccer Academy &middot; Donaueschingen</span><span class="hi">TSA Video Analyse Plattform &middot; v4.0</span></div>
+</div>
+
+<div id="pg-admin" class="page">
+  <div class="top-bar">
+    <div style="display:flex;align-items:center;gap:11px;"><div class="logo">TSA</div><div><div class="top-title">Admin &middot; Video &#220;bersicht</div><div class="top-sub">Jackson Agbonkhese &middot; TSA</div></div></div>
+    <div class="top-nav"><button type="button" class="nav-btn" onclick="goUpload()">&larr; Upload</button><button type="button" class="nav-btn" id="btn-logout" onclick="doLogout()" style="display:none">Abmelden</button></div>
+  </div>
+  <div class="admin-login" id="admin-login">
+    <div class="login-card fade">
+      <div class="login-title">&#128274; Admin Zugang</div>
+      <div class="frow"><label class="flabel">Passwort</label><input class="finput" id="admin-pw" type="password" placeholder="TSA Admin Passwort" autocomplete="new-password" onkeydown="if(event.key==='Enter')doLogin()"/><div class="login-err" id="login-err">Falsches Passwort.</div></div>
+      <button type="button" class="btn-submit" style="margin-top:8px" onclick="doLogin()">Einloggen</button>
+    </div>
+  </div>
+  <div class="admin-main" id="admin-main">
+    <div class="cfg-banner" id="cfg-banner"><strong>&#9881; DEMO-MODUS:</strong> Daten lokal gespeichert. Supabase + EmailJS in CONFIG eintragen.</div>
+    <div class="stats-bar" id="stats-bar"></div>
+    <div class="filter-bar">
+      <button type="button" class="filter-btn on" data-f="alle" onclick="setFilter(this)">Alle</button>
+      <button type="button" class="filter-btn" data-f="neu" onclick="setFilter(this)">&#128994; Neu</button>
+      <button type="button" class="filter-btn" data-f="analyse" onclick="setFilter(this)">&#128309; Analyse</button>
+      <button type="button" class="filter-btn" data-f="fertig" onclick="setFilter(this)">&#128992; Fertig</button>
+      <button type="button" class="filter-btn" data-f="eltern" onclick="setFilter(this)">Eltern</button>
+      <button type="button" class="filter-btn" data-f="trainer" onclick="setFilter(this)">Trainer</button>
+      <div class="search-wrap"><input class="filter-search" id="search-inp" placeholder="Suchen..." oninput="renderList()"/></div>
+    </div>
+    <div class="submissions" id="sub-list"></div>
+  </div>
+  <div class="foot"><span>&#169; Jackson Agbonkhese &middot; Talent Soccer Academy</span><span class="hi">Admin Dashboard &middot; v4.0</span></div>
+</div>
+
+<div class="dsmodal-overlay" id="ds-modal">
+  <div class="dsmodal">
+    <div class="dsmodal-head"><div class="dsmodal-head-title">&#128274; Datenschutzerkl&#228;rung</div><button type="button" class="dsmodal-close" onclick="closeDSModal()">&#10005;</button></div>
+    <div class="dsmodal-body">
+      <h3>1. Verantwortlicher</h3><p><strong>Jackson Agbonkhese</strong><br/>Talent Soccer Academy (TSA)<br/>Donaueschingen, Baden-W&#252;rttemberg</p>
+      <h3>2. Erhobene Daten</h3><ul><li>Vor- und Nachname</li><li>E-Mail-Adresse</li><li>Spielername, Geburtsjahr, Position</li><li>Videomaterial</li><li>Freiwillige Hinweise</li></ul>
+      <h3>3. Zweck</h3><ul><li>Talentanalyse durch das TSA-Team</li><li>KI-Analyse (Claude AI / Anthropic und ChatGPT / OpenAI)</li><li>Kommunikation &#252;ber Ergebnisse</li></ul>
+      <h3>4. Rechtsgrundlage</h3><p>Einwilligung gem. <strong>Art. 6 Abs. 1 lit. a DSGVO</strong>. Bei Minderj&#228;hrigen: <strong>Art. 8 DSGVO</strong>.</p>
+      <h3>5. KI-Systeme</h3><p>Nur <strong>Textdaten</strong> werden an KI &#252;bermittelt. <strong>Keine Videodateien</strong> werden weitergegeben.</p>
+      <h3>6. Ihre Rechte</h3><ul><li>Auskunft (Art. 15)</li><li>Berichtigung (Art. 16)</li><li>L&#246;schung (Art. 17)</li><li>Widerruf jederzeit m&#246;glich</li></ul>
+      <h3>7. Minderj&#228;hrigenschutz</h3><p>F&#252;r Spieler unter 18 Jahren ist die Einwilligung einer erziehungsberechtigten Person + Formular-Upload erforderlich.</p>
+    </div>
+    <div class="dsmodal-foot"><button type="button" class="btn-ds-close" onclick="closeDSModal()">Verstanden &amp; Schlie&#223;en</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+var CFG = {
+  SUPABASE_URL: 'DEINE_SUPABASE_URL',
+  SUPABASE_KEY: 'DEIN_SUPABASE_ANON_KEY',
+  EMAILJS_SERVICE: 'DEIN_SERVICE_ID',
+  EMAILJS_TEMPLATE_ADMIN: 'DEIN_TEMPLATE_ID_ADMIN',
+  EMAILJS_TEMPLATE_KUNDE: 'DEIN_TEMPLATE_ID_KUNDE',
+  EMAILJS_KEY: 'DEIN_PUBLIC_KEY',
+  JACKSON_EMAIL: 'info' + '@' + 'talentsoccer-academy.com',
+  ADMIN_PW: 'TSA@Jackson2026',
+  CLAUDE_MODEL: 'claude-sonnet-4-20250514',
+  OPENAI_KEY: 'DEIN_OPENAI_API_KEY',
+  OPENAI_MODEL: 'gpt-4o'
+};
+var DEMO = (CFG.SUPABASE_URL === 'DEINE_SUPABASE_URL');
+var MAX_BYTES = 50 * 1024 * 1024;
+var SK = 'tsa_subs_v4';
+var subs = [];
+var activeFilter = 'alle';
+var loggedIn = false;
+var chosenFile = null;
+var chosenDoc = null;
+var running = {};
+
+function get(id) { return document.getElementById(id); }
+
+function loadSubs() {
+  try { subs = JSON.parse(localStorage.getItem(SK) || '[]'); }
+  catch(e) { subs = []; }
+}
+function saveSubs() {
+  var safe = [];
+  for (var i=0; i<subs.length; i++) {
+    var s = subs[i];
+    if (s.videoData && s.videoData.length > 1500000) {
+      var c = {}; for (var k in s) c[k]=s[k]; c.videoData=null; safe.push(c);
+    } else { safe.push(s); }
+  }
+  try { localStorage.setItem(SK, JSON.stringify(safe)); }
+  catch(e) { showToast('Speicher voll'); }
+}
+
+function goAdmin() { get('pg-upload').classList.remove('active'); get('pg-admin').classList.add('active'); if (loggedIn) refreshAdmin(); }
+function goUpload() { get('pg-admin').classList.remove('active'); get('pg-upload').classList.add('active'); }
+function openDSModal() { get('ds-modal').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeDSModal() { get('ds-modal').classList.remove('open'); document.body.style.overflow=''; get('chk-dsgvo').checked=true; get('e-dsgvo').style.display='none'; }
+
+function onFileInput(inp) { var f=inp.files&&inp.files[0]; if(f) setChosenFile(f); }
+function setChosenFile(f) {
+  chosenFile=f;
+  get('file-nm').textContent=f.name;
+  get('file-sz').textContent=fmtBytes(f.size);
+  get('file-chosen').classList.add('show');
+  get('e-file').style.display='none';
+  if(DEMO&&f.size>MAX_BYTES){get('file-warn').classList.add('show');}else{get('file-warn').classList.remove('show');}
+}
+function onDocInput(inp) { var f=inp.files&&inp.files[0]; if(f){chosenDoc=f;get('doc-nm').textContent=f.name;get('doc-chosen').classList.add('show');get('e-doc').style.display='none';} }
+
+function updateMinorCheck() {
+  var year=parseInt(get('u-geb').value);
+  var cur=new Date().getFullYear();
+  var minor=!isNaN(year)&&year>1900&&(cur-year)<18;
+  get('chk-minor-wrap').style.display=minor?'':'none';
+  get('einwilligung-upload-wrap').style.display=minor?'':'none';
+  if(!minor){get('chk-minor').checked=false;chosenDoc=null;get('doc-chosen').classList.remove('show');}
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var dm=get('ds-modal');
+  if(dm) dm.addEventListener('click',function(e){if(e.target===dm)closeDSModal();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDSModal();});
+  var gebEl=get('u-geb'); if(gebEl) gebEl.addEventListener('input',updateMinorCheck);
+  var rolEl=get('u-rolle'); if(rolEl) rolEl.addEventListener('change',updateMinorCheck);
+  var dz=get('drop-zone');
+  if(dz){
+    dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag-over');});
+    dz.addEventListener('dragenter',function(e){e.preventDefault();dz.classList.add('drag-over');});
+    dz.addEventListener('dragleave',function(){dz.classList.remove('drag-over');});
+    dz.addEventListener('dragend',function(){dz.classList.remove('drag-over');});
+    dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag-over');var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f&&f.type.indexOf('video')===0)setChosenFile(f);});
+  }
+  var dd=get('drop-zone-doc');
+  if(dd){
+    dd.addEventListener('dragover',function(e){e.preventDefault();dd.classList.add('drag-over');});
+    dd.addEventListener('dragenter',function(e){e.preventDefault();dd.classList.add('drag-over');});
+    dd.addEventListener('dragleave',function(){dd.classList.remove('drag-over');});
+    dd.addEventListener('drop',function(e){e.preventDefault();dd.classList.remove('drag-over');var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f){chosenDoc=f;get('doc-nm').textContent=f.name;get('doc-chosen').classList.add('show');get('e-doc').style.display='none';}});
+  }
+});
+
+function validate() {
+  var ok=true;
+  var flds=[{i:'u-vn',e:'e-vn',t:function(v){return v.length>0;}},{i:'u-nn',e:'e-nn',t:function(v){return v.length>0;}},{i:'u-mail',e:'e-mail',t:function(v){return v.indexOf('@')>0&&v.indexOf('.')>0;}},{i:'u-sp',e:'e-sp',t:function(v){return v.length>0;}}];
+  flds.forEach(function(f){var v=get(f.i).value.trim();var fail=!f.t(v);get(f.e).style.display=fail?'block':'none';if(fail)ok=false;});
+  if(!chosenFile){get('e-file').style.display='block';ok=false;}else{get('e-file').style.display='none';}
+  if(!get('chk-dsgvo').checked){get('e-dsgvo').style.display='block';ok=false;}else{get('e-dsgvo').style.display='none';}
+  if(!get('chk-video').checked){get('e-video').style.display='block';ok=false;}else{get('e-video').style.display='none';}
+  if(!get('chk-agb').checked){get('e-agb').style.display='block';ok=false;}else{get('e-agb').style.display='none';}
+  if(get('chk-minor-wrap').style.display!=='none'){
+    if(!get('chk-minor').checked){get('e-minor').style.display='block';ok=false;}else{get('e-minor').style.display='none';}
+    if(!chosenDoc){get('e-doc').style.display='block';ok=false;}else{get('e-doc').style.display='none';}
+  }
+  if(!ok){var first=document.querySelector('.ferr[style*="block"],.ferr-chk[style*="block"]');if(first)first.scrollIntoView(false);}
+  return ok;
+}
+
+function submitForm() {
+  if(!validate())return;
+  var btn=get('btn-submit');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Wird eingereicht...';
+  var entry={
+    id:Date.now(),vorname:get('u-vn').value.trim(),nachname:get('u-nn').value.trim(),
+    email:get('u-mail').value.trim(),rolle:get('u-rolle').value,spieler:get('u-sp').value.trim(),
+    geburt:get('u-geb').value.trim(),position:get('u-pos').value,notiz:get('u-note').value.trim(),
+    dateiname:chosenFile.name,dateigroesse:chosenFile.size,videoData:null,videoUrl:null,
+    status:'neu',analyse:null,analyseKI:null,zeit:new Date().toISOString(),
+    hatEinwilligung:(chosenDoc!==null),einwilligungDatei:(chosenDoc?chosenDoc.name:null),
+    istMinderjaehrig:(get('chk-minor-wrap').style.display!=='none')
+  };
+  function finish(vd){
+    entry.videoData=vd;subs.unshift(entry);saveSubs();
+    if(!DEMO)sendMail(entry);
+    btn.disabled=false;btn.innerHTML='<span>&#128640;</span> Video einreichen';
+    get('upload-form').style.display='none';
+    showSuccessScreen(entry);showToast('Eingereicht');
+  }
+  if(!DEMO){uploadSupabase(chosenFile).then(function(url){entry.videoUrl=url;finish(null);}).catch(function(){finish(null);});return;}
+  // Demo-Modus: Kleine Dateien direkt lesen, grosse Dateien ohne Vorschau speichern
+  var MOBILE_MAX = 5 * 1024 * 1024; // 5MB fuer Mobile/In-App-Browser
+  if(chosenFile.size > MOBILE_MAX){
+    finish(null); // Ohne VideoData speichern - kein FileReader-Fehler
+    return;
+  }
+  try {
+    var reader = new FileReader();
+    reader.onload = function(ev){ finish(ev.target.result); };
+    reader.onerror = function(){ finish(null); }; // Fehler ignorieren, trotzdem speichern
+    reader.readAsDataURL(chosenFile);
+  } catch(e) {
+    finish(null); // FileReader nicht verfuegbar - trotzdem speichern
+  }
+}
+
+function showSuccessScreen(entry) {
+  get('success-screen').classList.add('show');
+  var rL={eltern:'Elternteil',spieler:'Spieler/in',trainer:'Trainer/Scout'};
+  var rLabel=rL[entry.rolle]||entry.rolle;
+  var zeitStr=new Date(entry.zeit).toLocaleString('de-DE',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  var details=[{l:'Spieler',v:entry.spieler},{l:'Eingereicht',v:zeitStr},{l:'Rolle',v:rLabel},{l:'E-Mail',v:entry.email},{l:'Position',v:entry.position||'-'},{l:'Jahrgang',v:entry.geburt||'-'},{l:'Videodatei',v:entry.dateiname},{l:'Dateigroesse',v:fmtBytes(entry.dateigroesse)}];
+  if(entry.istMinderjaehrig)details.push({l:'Einwilligung',v:entry.hatEinwilligung?'Hochgeladen':'Ausstehend',c:entry.hatEinwilligung?'var(--green)':'var(--red)'});
+  var html='';
+  details.forEach(function(d){html+='<div class="success-detail"><div class="sdl">'+d.l+'</div><div class="sdv" style="color:'+(d.c||'var(--text)')+'">'+esc(d.v)+'</div></div>';});
+  get('success-details').innerHTML=html;
+  if(DEMO){
+    get('success-mail-text').innerHTML='Im Demo-Modus keine E-Mail an <strong>'+esc(entry.email)+'</strong>.';
+    get('success-demo-note').style.display='';
+  } else {
+    get('success-mail-text').innerHTML='Best\u00e4tigungs-E-Mail an <strong>'+esc(entry.email)+'</strong> gesendet.';
+    get('success-demo-note').style.display='none';
+  }
+}
+
+function resetForm() {
+  get('upload-form').style.display='';get('success-screen').classList.remove('show');
+  ['u-vn','u-nn','u-mail','u-sp','u-geb','u-note'].forEach(function(id){get(id).value='';});
+  get('u-pos').value='';get('u-rolle').value='eltern';
+  get('file-chosen').classList.remove('show');get('file-warn').classList.remove('show');get('u-file').value='';
+  ['e-vn','e-nn','e-mail','e-sp','e-file'].forEach(function(id){get(id).style.display='none';});
+  ['chk-dsgvo','chk-video','chk-agb','chk-minor'].forEach(function(id){if(get(id))get(id).checked=false;});
+  ['e-dsgvo','e-video','e-agb','e-minor'].forEach(function(id){if(get(id))get(id).style.display='none';});
+  get('chk-minor-wrap').style.display='none';get('einwilligung-upload-wrap').style.display='none';
+  chosenFile=null;chosenDoc=null;
+  get('doc-chosen').classList.remove('show');if(get('u-doc'))get('u-doc').value='';if(get('e-doc'))get('e-doc').style.display='none';
+}
+
+function doLogin() {
+  var pw=get('admin-pw').value;
+  if(pw===CFG.ADMIN_PW){
+    loggedIn=true;get('admin-login').style.display='none';get('admin-main').classList.add('show');
+    get('btn-logout').style.display='';get('login-err').classList.remove('show');
+    get('cfg-banner').style.display=DEMO?'':'none';refreshAdmin();
+  } else {get('login-err').classList.add('show');get('admin-pw').value='';get('admin-pw').focus();}
+}
+function doLogout() {loggedIn=false;get('admin-main').classList.remove('show');get('admin-login').style.display='';get('btn-logout').style.display='none';get('admin-pw').value='';}
+
+function refreshAdmin(){loadSubs();renderStats();renderList();}
+
+function renderStats() {
+  var total=subs.length;
+  var neu=0,an=0,fi=0,el=0,tr=0;
+  subs.forEach(function(s){if(s.status==='neu')neu++;if(s.status==='analyse')an++;if(s.status==='fertig')fi++;if(s.rolle!=='trainer')el++;if(s.rolle==='trainer')tr++;});
+  var data=[{l:'Gesamt',v:total},{l:'Neu',v:neu,c:'color:var(--green)'},{l:'In Analyse',v:an,c:'color:#60a5fa'},{l:'Abgeschlossen',v:fi,c:'color:var(--orange)'},{l:'Eltern/Spieler',v:el},{l:'Trainer/Scout',v:tr}];
+  var html='';
+  data.forEach(function(d){html+='<div class="stat-item"><div class="stat-val" style="'+(d.c||'')+'">'+d.v+'</div><div class="stat-lbl">'+d.l+'</div></div>';});
+  get('stats-bar').innerHTML=html;
+}
+
+function setFilter(btn) {
+  activeFilter=btn.getAttribute('data-f');
+  var btns=document.querySelectorAll('.filter-btn');
+  for(var i=0;i<btns.length;i++)btns[i].classList.remove('on');
+  btn.classList.add('on');renderList();
+}
+
+function renderList() {
+  var q=get('search-inp')?get('search-inp').value.toLowerCase().trim():'';
+  var list=[];
+  subs.forEach(function(s){
+    if(['neu','analyse','fertig'].indexOf(activeFilter)>=0&&s.status!==activeFilter)return;
+    if(activeFilter==='eltern'&&s.rolle==='trainer')return;
+    if(activeFilter==='trainer'&&s.rolle!=='trainer')return;
+    if(q){var hay=((s.vorname||'')+' '+(s.nachname||'')+' '+(s.spieler||'')+' '+(s.email||'')).toLowerCase();if(hay.indexOf(q)<0)return;}
+    list.push(s);
+  });
+  var el=get('sub-list');
+  if(!list.length){el.innerHTML='<div class="sub-empty"><div class="sub-empty-icon">&#128237;</div><div class="sub-empty-text">Keine Einreichungen gefunden.</div></div>';return;}
+  var html='';list.forEach(function(s){html+=buildCard(s);});el.innerHTML=html;
+}
+
+function buildCard(s) {
+  var i1=s.vorname?s.vorname[0].toUpperCase():'?',i2=s.nachname?s.nachname[0].toUpperCase():'?';
+  var rC={eltern:'b-eltern',spieler:'b-spieler',trainer:'b-trainer'};
+  var rL={eltern:'Elternteil',spieler:'Spieler/in',trainer:'Trainer'};
+  var sC={neu:'b-neu',analyse:'b-analyse',fertig:'b-fertig'};
+  var sL={neu:'&#128994; Neu',analyse:'&#128309; Analyse',fertig:'&#128992; Fertig'};
+  var rCls=rC[s.rolle]||'b-eltern',rLabel=rL[s.rolle]||s.rolle;
+  var sCls=sC[s.status]||'b-neu',sLabel=sL[s.status]||s.status;
+  var zeit=new Date(s.zeit).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  var vh;
+  if(s.videoData){vh='<video class="sub-video" controls preload="metadata" playsinline><source src="'+s.videoData+'"/></video>';}
+  else if(s.videoUrl){vh='<video class="sub-video" controls preload="metadata" playsinline><source src="'+esc(s.videoUrl)+'"/></video>';}
+  else{vh='<div class="no-video"><div style="font-size:24px;margin-bottom:6px;">&#127916;</div><div class="no-video-txt">'+esc(s.dateiname||'Keine Vorschau')+'</div></div>';}
+  var ac=s.analyse?'<div class="analyse-body" id="ab-'+s.id+'">'+esc(s.analyse)+'</div>':'<div class="analyse-empty" id="ab-'+s.id+'">Noch keine Analyse.</div>';
+  var actl;
+  if(running[s.id]){actl='<div class="analyse-loading show" id="al-'+s.id+'"><div class="spinner"></div>Analyse laeuft...</div>';}
+  else{actl='<div class="analyse-loading" id="al-'+s.id+'"><div class="spinner"></div>Analyse laeuft...</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"><button type="button" class="btn-analyse" id="aa-'+s.id+'" onclick="runAnalyse('+s.id+',\'claude\')" style="background:var(--orange)">&#9889; Claude</button><button type="button" class="btn-analyse" id="ag-'+s.id+'" onclick="runAnalyse('+s.id+',\'openai\')" style="background:#10a37f">&#129302; ChatGPT</button></div>';}
+  var pb=s.position?'<span class="sub-badge" style="background:var(--mid);color:var(--muted);border-color:var(--border)">'+esc(s.position)+'</span>':''
+  var eb=s.istMinderjaehrig?(s.hatEinwilligung?'<span class="sub-badge" style="background:#052e16;color:#4ade80;border-color:#166534">&#10003; Einwilligung</span>':'<span class="sub-badge" style="background:#431407;color:#ef4444;border-color:#b91c1c">&#9888; Kein Dok.</span>'):''
+  var kl='Claude &middot; ChatGPT';if(s.analyseKI==='openai')kl='via ChatGPT';else if(s.analyseKI==='claude')kl='via Claude';
+  var avb='';if(s.analyseKI){var kc=s.analyseKI==='openai'?'#34d399':'var(--orange)',kn=s.analyseKI==='openai'?'&#129302; ChatGPT':'&#9889; Claude';avb='<div class="detail-box"><div class="dl">Analyse via</div><div class="dv" style="color:'+kc+'">'+kn+'</div></div>';}
+  var ed='';if(s.istMinderjaehrig){var ec=s.hatEinwilligung?'color:var(--green)':'color:var(--red)',et=s.hatEinwilligung?('Hochgeladen: '+esc(s.einwilligungDatei||'Ja')):'Nicht hochgeladen';ed='<div class="detail-box" style="grid-column:1/-1"><div class="dl">Einwilligungsformular</div><div class="dv" style="'+ec+'">'+et+'</div></div>';}
+  var nh=s.notiz?'<div class="notiz-box"><div class="dl">Hinweis</div><div class="notiz-txt">'+esc(s.notiz)+'</div></div>':''
+  return '<div class="sub-card fade" id="card-'+s.id+'"><div class="sub-hdr" onclick="toggleCard('+s.id+')"><div class="sub-avatar">'+i1+i2+'</div><div class="sub-info"><div class="sub-name">'+esc(s.vorname)+' '+esc(s.nachname)+'</div><div class="sub-meta">'+esc(s.email)+(s.spieler?' &middot; '+esc(s.spieler):'')+'</div><div class="sub-badges"><span class="sub-badge '+rCls+'">'+rLabel+'</span><span class="sub-badge '+sCls+'" id="sbadge-'+s.id+'">'+sLabel+'</span>'+pb+eb+'</div></div><div class="sub-right"><div class="sub-time">'+zeit+'</div><div class="sub-chev">&#9660;</div></div></div><div class="sub-body"><div class="video-wrap">'+vh+'</div>'+nh+'<div class="detail-grid"><div class="detail-box"><div class="dl">Datei</div><div class="dv">'+esc(s.dateiname||'-')+'</div></div><div class="detail-box"><div class="dl">Groesse</div><div class="dv">'+fmtBytes(s.dateigroesse)+'</div></div><div class="detail-box"><div class="dl">Jahrgang</div><div class="dv">'+esc(s.geburt||'-')+'</div></div><div class="detail-box"><div class="dl">Status</div><div class="dv" id="sdv-'+s.id+'">'+sLabel+'</div></div>'+avb+ed+'</div><div class="analyse-box"><div class="analyse-title">&#9889; TSA Talent DNA Analyse <span style="font-size:8px;color:var(--muted);font-weight:400" id="ai-label-'+s.id+'">'+kl+'</span></div>'+ac+actl+'</div><div class="sub-actions"><button type="button" class="act-btn" onclick="setStatus('+s.id+',\'neu\')">&#128994; Neu</button><button type="button" class="act-btn" onclick="setStatus('+s.id+',\'analyse\')">&#128309; Analyse</button><button type="button" class="act-btn" onclick="setStatus('+s.id+',\'fertig\')">&#128992; Fertig</button><button type="button" class="act-btn del" onclick="delEntry('+s.id+')">&#128465; Loeschen</button></div></div></div>';
+}
+
+function toggleCard(id){var c=get('card-'+id);if(c)c.classList.toggle('open');}
+
+function setStatus(id,status){
+  var s=null;subs.forEach(function(e){if(e.id===id)s=e;});if(!s)return;
+  s.status=status;saveSubs();renderStats();
+  var lbl={neu:'&#128994; Neu',analyse:'&#128309; Analyse',fertig:'&#128992; Fertig'}[status]||status;
+  var cls={neu:'b-neu',analyse:'b-analyse',fertig:'b-fertig'}[status]||'b-neu';
+  var badge=get('sbadge-'+id),sdv=get('sdv-'+id);
+  if(badge){badge.innerHTML=lbl;badge.className='sub-badge '+cls;}
+  if(sdv)sdv.innerHTML=lbl;
+  showToast('Status aktualisiert');
+}
+
+function delEntry(id){
+  var s=null;subs.forEach(function(e){if(e.id===id)s=e;});
+  var name=s?((s.vorname||'')+' '+(s.nachname||'')).trim():'';
+  if(!confirm('"'+name+'" wirklich loeschen?'))return;
+  var ns=[];subs.forEach(function(e){if(e.id!==id)ns.push(e);});subs=ns;
+  saveSubs();refreshAdmin();showToast('Geloescht');
+}
+
+function runAnalyse(id,ki) {
+  if(!ki)ki='claude';
+  if(running[id])return;
+  var s=null;subs.forEach(function(e){if(e.id===id)s=e;});if(!s)return;
+  running[id]=true;
+  var btnC=get('aa-'+id),btnG=get('ag-'+id),loader=get('al-'+id),body=get('ab-'+id);
+  var kiName=ki==='openai'?'ChatGPT':'Claude';
+  if(btnC)btnC.style.display='none';if(btnG)btnG.style.display='none';
+  if(loader)loader.classList.add('show');
+  if(body)body.innerHTML='<span style="font-style:italic;color:var(--muted)">'+kiName+' erstellt die Analyse...</span>';
+  var prompt='Du bist ein professioneller TSA Fussball-Scout auf NLZ-Niveau. Auftraggeber: Jackson Agbonkhese.\n\nSpieler: '+(s.spieler||'-')+'\nJahrgang: '+(s.geburt||'unbekannt')+'\nPosition: '+(s.position||'unbekannt')+'\nEingereicht von: '+s.rolle+' ('+s.vorname+' '+s.nachname+')\nSchwerpunkt: '+(s.notiz||'keiner')+'\n\nErstelle TSA Talent DNA Analyse-Vorlage:\n1. TECHNISCHE QUALITAET\n2. TAKTISCHES VERSTAENDNIS\n3. ATHLETISCHES PROFIL\n4. MENTALITAET & PERSOENLICHKEIT\n5. KREATIVITAET & SPIELINTELLIGENZ\n6. GESAMTBEWERTUNG\n7. EMPFEHLUNG\nSprache: staerkenorientiert, NLZ-Niveau.';
+  var url,headers,body2;
+  if(ki==='openai'){url='https://api.openai.com/v1/chat/completions';headers={'Content-Type':'application/json','Authorization':'Bearer '+CFG.OPENAI_KEY};body2=JSON.stringify({model:CFG.OPENAI_MODEL,max_tokens:1000,messages:[{role:'user',content:prompt}]});}
+  else{url='https://api.anthropic.com/v1/messages';headers={'Content-Type':'application/json'};body2=JSON.stringify({model:CFG.CLAUDE_MODEL,max_tokens:1000,messages:[{role:'user',content:prompt}]});}
+  function cleanup(){running[id]=false;if(btnC)btnC.style.display='';if(btnG)btnG.style.display='';if(loader)loader.classList.remove('show');}
+  fetch(url,{method:'POST',headers:headers,body:body2})
+    .then(function(r){
+      return r.json().then(function(d){return{ok:r.ok,status:r.status,data:d};});
+    })
+    .then(function(r){
+      if(!r.ok){cleanup();throw new Error((r.data.error&&r.data.error.message)||'HTTP '+r.status);}
+      var txt='';
+      if(ki==='openai'){
+        txt=(r.data.choices&&r.data.choices[0]&&r.data.choices[0].message&&r.data.choices[0].message.content)||'Keine Antwort.';
+      } else {
+        if(r.data.content){r.data.content.forEach(function(cc){if(cc.type==='text')txt+=cc.text;});}
+        if(!txt)txt='Keine Antwort.';
+      }
+      s.analyse=txt;s.analyseKI=ki;s.status='fertig';saveSubs();
+      if(body)body.innerHTML='<div class="analyse-body">'+esc(txt)+'</div>';
+      var aiL=get('ai-label-'+id);if(aiL)aiL.innerHTML=ki==='openai'?'via ChatGPT':'via Claude';
+      var badge=get('sbadge-'+id),sdv=get('sdv-'+id);
+      if(badge){badge.innerHTML='&#128992; Fertig';badge.className='sub-badge b-fertig';}
+      if(sdv)sdv.innerHTML='&#128992; Fertig';
+      renderStats();showToast(kiName+' Analyse abgeschlossen');
+      cleanup();
+    })
+    .catch(function(err){
+      if(body)body.innerHTML='<div class="analyse-empty" style="color:var(--red)">Fehler ('+kiName+'): '+esc(err.message)+'</div>';
+      showToast('Analyse fehlgeschlagen');
+      cleanup();
+    });
+}
+
+function sendMailAdmin(entry){if(typeof emailjs==='undefined')return;var rL={eltern:'Elternteil',spieler:'Spieler/in',trainer:'Trainer/Scout'};emailjs.send(CFG.EMAILJS_SERVICE,CFG.EMAILJS_TEMPLATE_ADMIN,{to_email:CFG.JACKSON_EMAIL,spieler:entry.spieler,einsender:entry.vorname+' '+entry.nachname,email:entry.email,rolle:rL[entry.rolle]||entry.rolle,position:entry.position||'-',geburt:entry.geburt||'-',dateiname:entry.dateiname,eingereicht:new Date(entry.zeit).toLocaleString('de-DE'),einwilligung:entry.hatEinwilligung?'Ja':'Nicht erforderlich'},CFG.EMAILJS_KEY).catch(function(e){console.warn(e);});}
+function sendMailKunde(entry){if(typeof emailjs==='undefined')return;var rL={eltern:'Elternteil',spieler:'Spieler/in',trainer:'Trainer/Scout'};emailjs.send(CFG.EMAILJS_SERVICE,CFG.EMAILJS_TEMPLATE_KUNDE,{to_email:entry.email,vorname:entry.vorname,nachname:entry.nachname,spieler:entry.spieler,rolle:rL[entry.rolle]||entry.rolle,position:entry.position||'-',geburt:entry.geburt||'-',dateiname:entry.dateiname,eingereicht:new Date(entry.zeit).toLocaleString('de-DE',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}),jackson_email:CFG.JACKSON_EMAIL},CFG.EMAILJS_KEY).catch(function(e){console.warn(e);});}
+function sendMail(entry){sendMailAdmin(entry);sendMailKunde(entry);}
+function uploadSupabase(f){return Promise.resolve(null);}
+
+function downloadPDF() {
+  if((window.jspdf&&window.jspdf.jsPDF)||window.jsPDF){generatePDF();return;}
+  showToast('PDF wird vorbereitet...');
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+  s.onload=function(){generatePDF();};
+  s.onerror=function(){showToast('PDF-Bibliothek nicht geladen');};
+  document.head.appendChild(s);
+}
+
+function generatePDF() {
+  var JsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+  if(!JsPDF){showToast('jsPDF nicht verfuegbar');return;}
+  var doc=new JsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  var heute=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  var W=210,M=18,CW=W-M*2,y=0;
+  doc.setFillColor(6,13,26);doc.rect(0,0,W,28,'F');
+  doc.setFillColor(249,115,22);doc.rect(0,28,W,2,'F');
+  doc.setFillColor(249,115,22);doc.roundedRect(M,6,16,16,2,2,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(6,13,26);doc.text('TSA',M+8,16,{align:'center'});
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text('TALENT SOCCER ACADEMY',M+21,13);
+  doc.setFontSize(8);doc.setTextColor(249,115,22);doc.text('Einwilligungserklaerung - Datenschutz - Elterliche Zustimmung',M+21,19);
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(200,200,200);doc.text('Stand: '+heute,W-M,24,{align:'right'});
+  y=38;
+  doc.setFillColor(255,247,237);doc.setDrawColor(249,115,22);doc.setLineWidth(0.4);doc.roundedRect(M,y,CW,18,2,2,'FD');
+  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(249,115,22);doc.text('WICHTIGER HINWEIS',M+4,y+6);
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(30,30,30);
+  var hw=doc.splitTextToSize('Dieses Formular muss vollstaendig ausgefuellt, handschriftlich unterschrieben und zusammen mit dem Video eingereicht werden.',CW-8);
+  doc.text(hw,M+4,y+12);y+=24;
+  function sh(t){doc.setFillColor(15,32,64);doc.roundedRect(M,y,CW,9,1.5,1.5,'F');doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(255,255,255);doc.text(t,M+4,y+6);y+=13;}
+  function tf(l1,l2){var h=(CW-6)/2;doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(100,116,139);doc.text(l1,M,y);doc.text(l2,M+h+6,y);doc.setDrawColor(226,232,240);doc.setLineWidth(0.3);doc.line(M,y+5,M+h,y+5);doc.line(M+h+6,y+5,M+CW,y+5);y+=11;}
+  function of(l){doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(100,116,139);doc.text(l,M,y);doc.setDrawColor(226,232,240);doc.setLineWidth(0.3);doc.line(M,y+5,M+CW,y+5);y+=11;}
+  function cr(t){doc.setDrawColor(249,115,22);doc.setLineWidth(0.4);doc.roundedRect(M,y,4.5,4.5,0.5,0.5,'D');doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(30,30,30);var lines=doc.splitTextToSize(t+' *',CW-7);doc.text(lines,M+6.5,y+3.5);y+=(lines.length*4.2)+4;}
+  sh('1. ANGABEN ZUM SPIELER');tf('Vorname des Spielers','Nachname des Spielers');tf('Geburtsdatum (TT.MM.JJJJ)','Geburtsort');tf('Aktueller Verein','Spielposition');of('Adresse (Strasse, PLZ, Ort)');
+  sh('2. ANGABEN DER ERZIEHUNGSBERECHTIGTEN PERSON');tf('Vorname','Nachname');tf('Verhaeltnis (z.B. Mutter, Vater)','Telefonnummer');of('E-Mail-Adresse');of('Adresse - falls abweichend');
+  sh('3. EINWILLIGUNGSERKLAERUNGEN');
+  cr('Datenverarbeitung (Art. 6 DSGVO): Einwilligung zur Verarbeitung der Daten meines Kindes fuer die Talentanalyse.');
+  cr('Videoanalyse: Das Video wird ausschliesslich zur Talentbewertung genutzt und nicht weitergegeben.');
+  cr('KI-Analyse (Claude AI / Anthropic und ChatGPT / OpenAI): Textdaten werden an KI-Systeme uebermittelt. Keine Videos.');
+  cr('Speicherung und Loeschung auf Anfrage moeglich.');
+  cr('Ich bestatige, erziehungsberechtigt zu sein und alle abgebildeten Personen informiert zu haben.');
+  doc.addPage();y=20;
+  sh('4. IHRE RECHTE GEMAESS DSGVO');
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(60,60,60);
+  var rt=doc.splitTextToSize('Auskunft (Art.15) - Berichtigung (Art.16) - Loeschung (Art.17) - Widerruf jederzeit - Beschwerde beim Landesbeauftragten BW. Kontakt: Jackson Agbonkhese, Talent Soccer Academy, Donaueschingen.',CW);
+  doc.text(rt,M,y);y+=rt.length*4.5+8;
+  sh('5. UNTERSCHRIFTEN');
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(60,60,60);doc.text('Durch meine Unterschrift bestatige ich, alle Punkte gelesen und zugestimmt zu haben.',M,y);y+=10;
+  var hw2=(CW-6)/2;
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(100,116,139);
+  doc.text('Ort, Datum',M,y);doc.text('Unterschrift Erziehungsberechtigte/r (handschriftlich)',M+hw2+6,y);y+=16;
+  doc.setDrawColor(226,232,240);doc.setLineWidth(0.4);doc.line(M,y,M+hw2,y);doc.line(M+hw2+6,y,M+CW,y);y+=20;
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(100,116,139);
+  doc.text('Ort, Datum',M,y);doc.text('Unterschrift Spieler/in (ab 14 Jahren)',M+hw2+6,y);y+=16;
+  doc.line(M,y,M+hw2,y);doc.line(M+hw2+6,y,M+CW,y);
+  var pages=doc.internal.getNumberOfPages();
+  for(var p=1;p<=pages;p++){
+    doc.setPage(p);doc.setDrawColor(249,115,22);doc.setLineWidth(0.5);doc.line(M,285,W-M,285);
+    doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(100,116,139);
+    doc.text('(c) Jackson Agbonkhese - Talent Soccer Academy - Donaueschingen',M,290);
+    doc.text('Seite '+p+' / '+pages,W-M,290,{align:'right'});
+    doc.setTextColor(249,115,22);doc.text('Version 1.0 - '+new Date().getFullYear(),W/2,290,{align:'center'});
+  }
+  doc.save('TSA_Einwilligungserklaerung.pdf');showToast('PDF heruntergeladen');
+}
+
+function esc(s){if(s==null)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtBytes(b){if(!b)return '-';return b<1048576?Math.round(b/1024)+' KB':(b/1048576).toFixed(1)+' MB';}
+var toastTimer;
+function showToast(msg){var el=get('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove('show');},2400);}
+
+loadSubs();
+</script>
+</body>
+</html>
